@@ -1,5 +1,4 @@
 # HashBrown CMS
-# test
 A free and open-source headless CMS built with Node.js and MongoDB
 
 ## The centralised approach
