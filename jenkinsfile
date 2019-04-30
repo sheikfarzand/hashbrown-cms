@@ -1,0 +1,22 @@
+def GIT_URL = 'https://github.com/sheikfarzand/hashbrown-cms.git'
+node {
+    stage ('Clone') {
+        checkout([$class: 'GitSCM', branches: [[name: 'stable']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'WipeWorkspace'], [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: false, recursiveSubmodules: true, reference: '', trackingSubmodules: false]], submoduleCfg: [], userRemoteConfigs: [[url: GIT_URL]]])
+    }
+    
+    stage ('npm install') {
+        sh 'npm install --production'
+    }
+    
+    stage ('Docker clean') {
+        try {
+            sh 'docker rm hashbrown-cms--node hashbrown-cms--mongodb -f'
+        } catch(Exception ex) {
+            echo "Container does not exist, moving on ..."
+        }
+    }
+    
+    stage ('Docker compose') {
+        sh '/usr/local/bin/docker-compose up --build -d'
+    }
+}
