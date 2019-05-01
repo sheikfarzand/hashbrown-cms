@@ -17,20 +17,19 @@ node {
     }
 
     stage ('Deploy the package in remote') {
-        sh 'scp pack.tar 18.221.201.224:/opt/'
-        sh 'ssh 18.221.201.224 mkdir /opt/hashbrown'
-        sh 'ssh 18.221.201.224 "cd /opt && tar -xzf pack.tar -C /opt/hashbrown"'
-    }
-
-    stage ('Docker clean') {
+        sh 'scp pack.tar.gz 18.221.201.224:/opt/'
         try {
-            sh 'docker rm hashbrown-cms--node hashbrown-cms--mongodb -f'
+            sh 'docker -H tcp://18.221.201.224:4243 rm hashbrown-cms--node hashbrown-cms--mongodb -f'
         } catch(Exception ex) {
             echo "Container does not exist, moving on ..."
         }
+        sh 'ssh 18.221.201.224 rm -rf /opt/hashbrown'
+        sh 'ssh 18.221.201.224 mkdir /opt/hashbrown'
+        sh 'ssh 18.221.201.224 "cd /opt && tar -xzf pack.tar.gz -C /opt/hashbrown"'
     }
+
     
     stage ('Docker compose') {
-        sh '/usr/local/bin/docker-compose up --build -d'
+        sh 'ssh 18.221.201.224 "cd /opt/hashbrown && /usr/bin/docker-compose up --build -d"'
     }
 }
