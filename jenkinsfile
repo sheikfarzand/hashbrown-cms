@@ -1,4 +1,6 @@
 def GIT_URL = 'https://github.com/sheikfarzand/hashbrown-cms.git'
+def ANSIBLE_GIT_URL = 'https://github.com/sheikfarzand/lt-ansible-infra.git'
+
 node {
     stage ('Clone') {
         checkout([$class: 'GitSCM', branches: [[name: 'stable']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'WipeWorkspace'], [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: false, recursiveSubmodules: true, reference: '', trackingSubmodules: false]], submoduleCfg: [], userRemoteConfigs: [[url: GIT_URL]]])
@@ -6,8 +8,20 @@ node {
     
     stage ('npm install') {
         sh 'npm install --production'
+        sh 'tar -zcf pack.tar.gz *'
     }
     
+    stage ('Clone ansible repo') {
+        git ANSIBLE_GIT_URL
+        sh 'ansible-playbook IaaC_infra.yml'
+    }
+
+    stage ('Deploy the package in remote') {
+        sh 'scp pack.tar 18.221.201.224:/opt/'
+        sh 'ssh 18.221.201.224 mkdir /opt/hashbrown'
+        sh 'ssh 18.221.201.224 "cd /opt && tar -xzf pack.tar -C /opt/hashbrown"'
+    }
+
     stage ('Docker clean') {
         try {
             sh 'docker rm hashbrown-cms--node hashbrown-cms--mongodb -f'
