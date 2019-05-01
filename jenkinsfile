@@ -34,6 +34,6 @@ node {
     }
 
     stage ('Final end point and URL') {
-        sh 'set +x; echo End point url >>>>>>>> http://18.221.201.224:8082'
+        sh 'set +x; echo End point url --------  http://18.221.201.224:8082'
     }
 }
