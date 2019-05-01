@@ -32,4 +32,10 @@ node {
     stage ('Docker compose') {
         sh 'ssh 18.221.201.224 "cd /opt/hashbrown && /usr/bin/docker-compose up --build -d"'
     }
+
+    stage ('Final end point and URL') {
+        sh 'echo ==================='
+        sh 'echo 18.221.201.224:8082'
+        sh 'echo ==================='
+    }
 }
